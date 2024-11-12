@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using NAudio.CoreAudioApi;
+using NAudio.CoreAudioApi.Interfaces; // 添加此行
 using System.Windows.Threading;
 
 namespace WpfApp1
@@ -20,18 +21,29 @@ namespace WpfApp1
             hideTimer.Interval = TimeSpan.FromSeconds(2);
             hideTimer.Tick += HideTimer_Tick;
 
-            deviceEnumerator = new MMDeviceEnumerator();
-            device = deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-            device.AudioEndpointVolume.OnVolumeNotification += AudioEndpointVolume_OnVolumeNotification;
+            InitializeAudioDevice();
 
             this.ShowInTaskbar = false; // 隐藏任务栏图标
             this.Topmost = true; // 窗口始终在最前面
             Loaded += MainWindow_Loaded;
         }
 
+        private void InitializeAudioDevice()
+        {
+            if (device != null)
+            {
+                device.AudioEndpointVolume.OnVolumeNotification -= AudioEndpointVolume_OnVolumeNotification;
+            }
+
+            deviceEnumerator = new MMDeviceEnumerator();
+            device = deviceEnumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+            device.AudioEndpointVolume.OnVolumeNotification += AudioEndpointVolume_OnVolumeNotification;
+        }
+
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             MakeWindowOnAllDesktops(new WindowInteropHelper(this).Handle);
+            deviceEnumerator.RegisterEndpointNotificationCallback(new AudioEndpointNotificationCallback(this));
         }
 
         [DllImport("user32.dll", SetLastError = true)]
@@ -106,6 +118,32 @@ namespace WpfApp1
             VolumeText.Text = $"{VolumeBar.Value}%";
             // 根据进度条的值更新 TextBlock 的位置
             VolumeText.Margin = new Thickness(VolumeBar.Value * (VolumeBar.Width / VolumeBar.Maximum) - VolumeText.ActualWidth / 2, 0, 0, 0);
+        }
+
+        private class AudioEndpointNotificationCallback : IMMNotificationClient
+        {
+            private MainWindow mainWindow;
+
+            public AudioEndpointNotificationCallback(MainWindow mainWindow)
+            {
+                this.mainWindow = mainWindow;
+            }
+
+            public void OnDefaultDeviceChanged(DataFlow flow, Role role, string defaultDeviceId)
+            {
+                if (flow == DataFlow.Render && role == Role.Multimedia)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        mainWindow.InitializeAudioDevice();
+                    });
+                }
+            }
+
+            public void OnDeviceAdded(string pwstrDeviceId) { }
+            public void OnDeviceRemoved(string pwstrDeviceId) { }
+            public void OnDeviceStateChanged(string pwstrDeviceId, DeviceState dwNewState) { }
+            public void OnPropertyValueChanged(string pwstrDeviceId, PropertyKey key) { }
         }
     }
 }
