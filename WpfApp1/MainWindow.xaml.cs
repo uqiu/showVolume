@@ -314,8 +314,6 @@ namespace WpfApp1
             this.Left = (desktopWorkingArea.Width - this.Width) / 2;
             this.Top = desktopWorkingArea.Bottom - this.Height - 10;
             this.Hide();
-
-            UpdateVolumeText();
         }
 
         private void HideTimer_Tick(object? sender, EventArgs e)
@@ -335,17 +333,20 @@ namespace WpfApp1
             try
             {
                 VolumeBar.Value = volume;
-                VolumeText.Text = volume.ToString();
-                UpdateVolumeText();
+                VolumeText.Text = $"{volume}%";
+                
+                // 更新设备名称
+                DeviceNameText.Text = device?.FriendlyName ?? "未知设备";
+                
                 this.Show();
                 hideTimer.Stop();
                 hideTimer.Start();
 
-                // 更新托盘图标，不显示百分号
+                // 更新托盘图标
                 if (notifyIcon != null)
                 {
                     notifyIcon.Icon = CreateIconWithText(volume.ToString());
-                    notifyIcon.Text = $"Volume: {volume}%"; // 提示文本仍保留百分号
+                    notifyIcon.Text = $"{device?.FriendlyName ?? "未知设备"}: {volume}%";
                 }
             }
             catch (Exception ex)
@@ -360,22 +361,6 @@ namespace WpfApp1
             {
                 UpdateVolume(newVolume);
             });
-        }
-
-        private void UpdateVolumeText()
-        {
-            VolumeText.Text = $"{VolumeBar.Value}%";
-            
-            // 等待布局更新完成
-            VolumeText.UpdateLayout();
-            
-            // 计算文本应该的左边距，使其完全居中
-            double windowWidth = this.ActualWidth;
-            double textWidth = VolumeText.ActualWidth;
-            double leftMargin = (windowWidth - textWidth) / 2;
-            
-            // 设置边距使文本完全居中
-            VolumeText.Margin = new Thickness(leftMargin, VolumeText.Margin.Top, leftMargin, VolumeText.Margin.Bottom);
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -444,7 +429,7 @@ namespace WpfApp1
                     {
                         mainWindow.Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            // 先清理旧设备
+                            // ���清理旧设备
                             mainWindow.CleanupAudioDevice();
                             // 重新初始化并更新UI
                             if (mainWindow.InitializeAudioDevice())

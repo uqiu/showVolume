@@ -23,21 +23,41 @@
                         <Rectangle Fill="{TemplateBinding Background}"/>
                         <Rectangle x:Name="PART_Track"/>
                         <Rectangle x:Name="PART_Indicator" Fill="{TemplateBinding Foreground}" HorizontalAlignment="Left"/>
+                        <Grid Margin="10,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="PART_VolumeText" 
+                                     Grid.Column="0"
+                                     Text="{Binding ElementName=VolumeText, Path=Text}"
+                                     Foreground="White" 
+                                     FontSize="14"
+                                     FontWeight="Bold"
+                                     VerticalAlignment="Center">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect BlurRadius="2" ShadowDepth="1" Color="Black" Opacity="0.8"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                            <TextBlock x:Name="PART_DeviceName"
+                                     Grid.Column="2"
+                                     Text="{Binding ElementName=DeviceNameText, Path=Text}"
+                                     Foreground="White"
+                                     FontSize="12"
+                                     TextTrimming="CharacterEllipsis"
+                                     VerticalAlignment="Center">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect BlurRadius="2" ShadowDepth="1" Color="Black" Opacity="0.8"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                        </Grid>
                     </Grid>
                 </ControlTemplate>
             </ProgressBar.Template>
         </ProgressBar>
 
-        <TextBlock x:Name="VolumeText" 
-                   VerticalAlignment="Center" 
-                   HorizontalAlignment="Center"
-                   Margin="15,0,0,0"
-                   Foreground="White" 
-                   FontSize="14"
-                   FontWeight="Bold">
-            <TextBlock.Effect>
-                <DropShadowEffect BlurRadius="2" ShadowDepth="1" Color="Black" Opacity="0.8"/>
-            </TextBlock.Effect>
-        </TextBlock>
+        <TextBlock x:Name="VolumeText" Visibility="Collapsed"/>
+        <TextBlock x:Name="DeviceNameText" Visibility="Collapsed"/>
     </Grid>
 </Window>
