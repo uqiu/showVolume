@@ -4,16 +4,16 @@
 winexe
 C#
 .cs
-C:\tools\volume\showVolume\WpfApp1\obj\Debug\net8.0-windows\
+C:\tools\volume\showVolume\WpfApp1\obj\Debug\net6.0-windows\
 WpfApp1
 none
 false
-TRACE;DEBUG;NET;NET8_0;NETCOREAPP
+TRACE;DEBUG;NET;NET6_0;NETCOREAPP
 C:\tools\volume\showVolume\WpfApp1\App.xaml
 11407045341
 
-6-294469655
-216-1145250963
+6-1365747110
+212-1639714722
 MainWindow.xaml;
 
 False
