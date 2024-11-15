@@ -52,6 +52,7 @@ namespace WpfApp1
                 }
 
                 notificationClient = new AudioEndpointNotificationCallback(this); // 实例化类级别变量
+                deviceEnumerator.RegisterEndpointNotificationCallback(notificationClient); // 注册回调
             }
             catch (Exception ex)
             {
