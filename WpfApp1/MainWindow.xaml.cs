@@ -6,6 +6,8 @@ using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 using System.Windows.Threading;
 using System.Drawing;
+// 确保使用正确的 FontStyle
+using FontStyle = System.Drawing.FontStyle;
 using System.Windows.Forms;
 using System.Drawing.Text;
 using System.Drawing.Drawing2D;
@@ -199,27 +201,57 @@ namespace WpfApp1
 
             try
             {
-                bitmap = new Bitmap(16, 16);
+                bitmap = new Bitmap(32, 32);
                 using (Graphics g = Graphics.FromImage(bitmap))
                 {
                     g.Clear(Color.Transparent);
                     g.SmoothingMode = SmoothingMode.AntiAlias;
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                    // 修改：使用FontFamily创建字体
-                    using (FontFamily fontFamily = new FontFamily("Segoe UI"))
-                    using (Font font = new Font(fontFamily, 9f, System.Drawing.FontStyle.Regular, GraphicsUnit.Pixel))
+                    // 增大基础字体大小 (原有大小的 130%)
+                    float fontSize = text.Length <= 2 ? 23.4f : 20.8f;  // 18 * 1.3 和 16 * 1.3
+                    if (text.Length >= 3) fontSize = 18.2f;  // 14 * 1.3
+
+                    using (var fontFamily = new FontFamily("Consolas"))  // 改为 Consolas 字体
+                    using (var font = new Font(fontFamily, fontSize, System.Drawing.FontStyle.Bold, GraphicsUnit.Pixel))
                     {
                         SizeF textSize = g.MeasureString(text, font);
-                        float x = (16 - textSize.Width) / 2;
-                        float y = (16 - textSize.Height) / 2;
+                
+                        // 计算缩放比例，确保文字完全适应图标
+                        float scale = Math.Min(28f / textSize.Width, 28f / textSize.Height) * 1.25f;
+                        fontSize *= scale;
 
-                        g.DrawString(text, font, Brushes.Black, x, y);
+                        // 使用调整后的字体大小重新创建字体
+                        using (var scaledFont = new Font(fontFamily, fontSize, System.Drawing.FontStyle.Bold, GraphicsUnit.Pixel))
+                        {
+                            textSize = g.MeasureString(text, scaledFont);
+                            float x = (32f - textSize.Width) / 2;
+                            float y = (32f - textSize.Height) / 2;
+
+                            using (GraphicsPath path = new GraphicsPath())
+                            {
+                                path.AddString(
+                                    text,
+                                    fontFamily,
+                                    (int)System.Drawing.FontStyle.Bold,
+                                    fontSize,
+                                    new PointF(x, y),
+                                    StringFormat.GenericDefault
+                                );
+
+                                // 直接使用白色填充文字，不添加描边
+                                using (Brush brush = new SolidBrush(Color.White))
+                                {
+                                    g.FillPath(brush, path);
+                                }
+                            }
+                        }
                     }
                 }
 
                 hIcon = bitmap.GetHicon();
-                _currentIcon = System.Drawing.Icon.FromHandle(hIcon); // 显式指定 System.Drawing.Icon
+                _currentIcon = System.Drawing.Icon.FromHandle(hIcon);
                 return _currentIcon;
             }
             finally
