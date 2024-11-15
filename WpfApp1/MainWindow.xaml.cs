@@ -186,6 +186,19 @@ namespace WpfApp1
             notifyIcon.Icon = CreateIconWithText("0");
             notifyIcon.Visible = true;
             notifyIcon.Text = "Volume: 0%";
+
+            // 创建右键菜单
+            ContextMenuStrip contextMenu = new ContextMenuStrip();
+            ToolStripMenuItem exitMenuItem = new ToolStripMenuItem("退出");
+            exitMenuItem.Click += (s, e) => 
+            {
+                notifyIcon.Visible = false;
+                System.Windows.Application.Current.Shutdown();
+            };
+            contextMenu.Items.Add(exitMenuItem);
+
+            // 将菜单绑定到托盘图标
+            notifyIcon.ContextMenuStrip = contextMenu;
         }
 
         private Icon CreateIconWithText(string text)
