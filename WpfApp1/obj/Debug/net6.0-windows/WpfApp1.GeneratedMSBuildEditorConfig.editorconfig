@@ -14,6 +14,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = WpfApp1
-build_property.ProjectDir = C:\tools\volume\showVolume\WpfApp1\
+build_property.ProjectDir = C:\Users\mann\source\repos\showVolume\WpfApp1\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

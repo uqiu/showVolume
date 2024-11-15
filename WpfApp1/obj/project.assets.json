@@ -620,23 +620,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\wankun\\.nuget\\packages\\": {},
+    "C:\\Users\\mann\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\tools\\volume\\showVolume\\WpfApp1\\WpfApp1.csproj",
+      "projectUniqueName": "C:\\Users\\mann\\source\\repos\\showVolume\\WpfApp1\\WpfApp1.csproj",
       "projectName": "WpfApp1",
-      "projectPath": "C:\\tools\\volume\\showVolume\\WpfApp1\\WpfApp1.csproj",
-      "packagesPath": "C:\\Users\\wankun\\.nuget\\packages\\",
-      "outputPath": "C:\\tools\\volume\\showVolume\\WpfApp1\\obj\\",
+      "projectPath": "C:\\Users\\mann\\source\\repos\\showVolume\\WpfApp1\\WpfApp1.csproj",
+      "packagesPath": "C:\\Users\\mann\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\mann\\source\\repos\\showVolume\\WpfApp1\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\wankun\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\mann\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],

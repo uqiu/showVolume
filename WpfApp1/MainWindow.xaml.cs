@@ -22,6 +22,7 @@ namespace WpfApp1
         private MMDevice device;
         private NotifyIcon notifyIcon;
         private Icon _currentIcon;
+        private AudioEndpointNotificationCallback notificationClient; // 定义类级别变量
 
         public MainWindow()
         {
@@ -49,6 +50,8 @@ namespace WpfApp1
                 {
                     throw new Exception("音频设备初始化失败");
                 }
+
+                notificationClient = new AudioEndpointNotificationCallback(this); // 实例化类级别变量
             }
             catch (Exception ex)
             {
@@ -281,7 +284,7 @@ namespace WpfApp1
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             MakeWindowOnAllDesktops(new WindowInteropHelper(this).Handle);
-            deviceEnumerator.RegisterEndpointNotificationCallback(new AudioEndpointNotificationCallback(this));
+            deviceEnumerator.RegisterEndpointNotificationCallback(notificationClient); // 使用类级别变量
         }
 
         private class NativeMethods
@@ -319,7 +322,14 @@ namespace WpfApp1
 
         private void AudioEndpointVolume_OnVolumeNotification(AudioVolumeNotificationData data)
         {
-            OnVolumeChanged((int)(data.MasterVolume * 100));
+            try
+            {
+                OnVolumeChanged((int)(data.MasterVolume * 100));
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"音量通知处理失败: {ex.Message}");
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -368,16 +378,23 @@ namespace WpfApp1
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"更新音量显示失败: {ex.Message}");
+                Debug.WriteLine($"更新音量显示失败: {ex.Message}");
             }
         }
 
         public void OnVolumeChanged(int newVolume)
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                UpdateVolume(newVolume);
-            });
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    UpdateVolume(newVolume);
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"音量变化处理失败: {ex.Message}");
+            }
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -386,7 +403,7 @@ namespace WpfApp1
             try
             {
                 MakeWindowOnAllDesktops(new WindowInteropHelper(this).Handle);
-                deviceEnumerator?.RegisterEndpointNotificationCallback(new AudioEndpointNotificationCallback(this));
+                deviceEnumerator?.RegisterEndpointNotificationCallback(notificationClient); // 使用类级别变量
             }
             catch (Exception ex)
             {
@@ -446,22 +463,28 @@ namespace WpfApp1
                     {
                         mainWindow.Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            // ���清理旧设备
-                            mainWindow.CleanupAudioDevice();
-                            // 重新初始化并更新UI
-                            if (mainWindow.InitializeAudioDevice())
+                            try
                             {
-                                // 获取并显示新设备的当前音量
-                                try
+                                // 清理旧设备
+                                mainWindow.CleanupAudioDevice();
+                                // 重新初始化并更新UI
+                                if (mainWindow.InitializeAudioDevice())
                                 {
-                                    var currentVolume = (int)(mainWindow.device.AudioEndpointVolume.MasterVolumeLevelScalar * 100);
-                                    mainWindow.UpdateVolume(currentVolume);
-
+                                    // 获取并显示新设备的当前音量
+                                    try
+                                    {
+                                        var currentVolume = (int)(mainWindow.device.AudioEndpointVolume.MasterVolumeLevelScalar * 100);
+                                        mainWindow.UpdateVolume(currentVolume);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine($"更新音量失败: {ex.Message}");
+                                    }
                                 }
-                                catch (Exception ex)
-                                {
-                                    System.Windows.MessageBox.Show($"更���音量失败: {ex.Message}");
-                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"默认设备更改处理失败: {ex.Message}");
                             }
                         }));
                     }
