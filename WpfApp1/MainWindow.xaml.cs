@@ -201,7 +201,7 @@ namespace WpfApp1
             notifyIcon.ContextMenuStrip = contextMenu;
         }
 
-        private Icon CreateIconWithText(string text)
+        private Icon CreateIconWithText(string text, bool isMuted = false)
         {
             if (_currentIcon != null)
             {
@@ -253,8 +253,9 @@ namespace WpfApp1
                                     StringFormat.GenericDefault
                                 );
 
-                                // 直接使用白色填充文字，不添加描边
-                                using (Brush brush = new SolidBrush(Color.White))
+                                // 根据静音状态选择颜色
+                                Color textColor = isMuted ? Color.Red : Color.White;
+                                using (Brush brush = new SolidBrush(textColor))
                                 {
                                     g.FillPath(brush, path);
                                 }
@@ -355,11 +356,14 @@ namespace WpfApp1
                 hideTimer.Stop();
                 hideTimer.Start();
 
-                // 更新托盘图标
+                // 检查静音状态
+                bool isMuted = device?.AudioEndpointVolume.Mute ?? false;
+
+                // 更新托盘图标，传入静音状态
                 if (notifyIcon != null)
                 {
-                    notifyIcon.Icon = CreateIconWithText(volume.ToString());
-                    notifyIcon.Text = $"{device?.FriendlyName ?? "未知设备"}: {volume}%";
+                    notifyIcon.Icon = CreateIconWithText(volume.ToString(), isMuted);
+                    notifyIcon.Text = $"{device?.FriendlyName ?? "未知设备"}: {volume}% {(isMuted ? "(已静音)" : "")}";
                 }
             }
             catch (Exception ex)
