@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using System.Drawing.Text;
 using System.Drawing.Drawing2D;
 using System.Diagnostics; // 添加此行
+using System.Threading; // 添加此行
 
 namespace WpfApp1
 {
@@ -23,6 +24,8 @@ namespace WpfApp1
         private NotifyIcon notifyIcon;
         private Icon _currentIcon;
         private AudioEndpointNotificationCallback notificationClient; // 定义类级别变量
+        private CancellationTokenSource volumeUpdateCancellationTokenSource; // 添加此行
+        private CancellationTokenSource debounceCancellationTokenSource; // 添加此行
 
         public MainWindow()
         {
@@ -77,7 +80,7 @@ namespace WpfApp1
                 // 清理现有资源
                 CleanupAudioDevice();
 
-                // 创建设备枚举器
+                // 创���设备枚举器
                 try
                 {
                     deviceEnumerator = new MMDeviceEnumerator();
@@ -325,7 +328,22 @@ namespace WpfApp1
         {
             try
             {
-                OnVolumeChanged((int)(data.MasterVolume * 100));
+                // 取消之前的防抖动操作
+                debounceCancellationTokenSource?.Cancel();
+                debounceCancellationTokenSource = new CancellationTokenSource();
+                var token = debounceCancellationTokenSource.Token;
+
+                Task.Delay(50, token).ContinueWith(t =>
+                {
+                    if (!t.IsCanceled)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            // 立即更新音量
+                            UpdateVolume((int)(data.MasterVolume * 100), token);
+                        });
+                    }
+                }, token);
             }
             catch (Exception ex)
             {
@@ -364,8 +382,51 @@ namespace WpfApp1
                 DeviceNameText.Text = device?.FriendlyName ?? "未知设备";
                 
                 this.Show();
-                hideTimer.Stop();
-                hideTimer.Start();
+                hideTimer.Stop(); // 停止计时器
+                hideTimer.Start(); // 重新启动计时器
+
+                // 检查静音状态
+                bool isMuted = device?.AudioEndpointVolume.Mute ?? false;
+
+                // 更新托盘图标，传入静音状态
+                if (notifyIcon != null)
+                {
+                    notifyIcon.Icon = CreateIconWithText(volume.ToString(), isMuted);
+                    notifyIcon.Text = $"{device?.FriendlyName ?? "未知设备"}: {volume}% {(isMuted ? "(已静音)" : "")}";
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"更新音量显示失败: {ex.Message}");
+            }
+        }
+
+        public void UpdateVolume(int volume, CancellationToken cancellationToken)
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(() => UpdateVolume(volume, cancellationToken));
+                return;
+            }
+
+            try
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                // 立即更新滚动条值
+                VolumeBar.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, null);
+                VolumeBar.Value = volume;
+                VolumeText.Text = $"{volume}%";
+                
+                // 更新设备名称
+                DeviceNameText.Text = device?.FriendlyName ?? "未知设备";
+                
+                this.Show();
+                hideTimer.Stop(); // 停止计时器
+                hideTimer.Start(); // 重新启动计时器
 
                 // 检查静音状态
                 bool isMuted = device?.AudioEndpointVolume.Mute ?? false;
@@ -387,10 +448,21 @@ namespace WpfApp1
         {
             try
             {
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                // 取消之前的防抖动操作
+                debounceCancellationTokenSource?.Cancel();
+                debounceCancellationTokenSource = new CancellationTokenSource();
+                var token = debounceCancellationTokenSource.Token;
+
+                Task.Delay(50, token).ContinueWith(t =>
                 {
-                    UpdateVolume(newVolume);
-                });
+                    if (!t.IsCanceled)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            UpdateVolume(newVolume, token);
+                        });
+                    }
+                }, token);
             }
             catch (Exception ex)
             {
