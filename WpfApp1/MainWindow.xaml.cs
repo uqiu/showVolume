@@ -56,6 +56,8 @@ namespace WpfApp1
 
                 notificationClient = new AudioEndpointNotificationCallback(this); // 实例化类级别变量
                 deviceEnumerator.RegisterEndpointNotificationCallback(notificationClient); // 注册回调
+
+                VolumeBar.MouseDown += VolumeBar_MouseDown; // 添加此行
             }
             catch (Exception ex)
             {
@@ -568,6 +570,14 @@ namespace WpfApp1
             public void OnDeviceRemoved(string pwstrDeviceId) { }
             public void OnDeviceStateChanged(string pwstrDeviceId, DeviceState dwNewState) { }
             public void OnPropertyValueChanged(string pwstrDeviceId, PropertyKey key) { }
+        }
+
+        private void VolumeBar_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var mousePosition = e.GetPosition(VolumeBar);
+            var newVolume = (int)(mousePosition.X / VolumeBar.ActualWidth * 100);
+            UpdateVolume(newVolume);
+            device.AudioEndpointVolume.MasterVolumeLevelScalar = newVolume / 100.0f;
         }
     }
 }

@@ -16,7 +16,8 @@
                      Maximum="100" 
                      Background="#FF3C3C3C" 
                      Foreground="#FF007ACC" 
-                     BorderThickness="0">
+                     BorderThickness="0"
+                     IsHitTestVisible="True">
             <ProgressBar.Template>
                 <ControlTemplate TargetType="{x:Type ProgressBar}">
                     <Grid>
