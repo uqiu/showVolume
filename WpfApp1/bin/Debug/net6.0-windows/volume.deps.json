@@ -6,14 +6,14 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {
-      "WpfApp1/1.0.0": {
+      "volume/1.0.0": {
         "dependencies": {
           "AudioSwitcher.AudioApi.CoreAudio": "3.0.3",
           "NAudio": "2.1.0",
           "System.Drawing.Common": "7.0.0"
         },
         "runtime": {
-          "WpfApp1.dll": {}
+          "volume.dll": {}
         }
       },
       "AudioSwitcher.AudioApi/3.0.0": {
@@ -168,7 +168,7 @@
     }
   },
   "libraries": {
-    "WpfApp1/1.0.0": {
+    "volume/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
