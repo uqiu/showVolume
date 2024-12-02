@@ -13,6 +13,7 @@ using System.Drawing.Text;
 using System.Drawing.Drawing2D;
 using System.Diagnostics; // 添加此行
 using System.Threading; // 添加此行
+using System.Media; // 添加此行
 
 namespace WpfApp1
 {
@@ -578,6 +579,24 @@ namespace WpfApp1
             var newVolume = (int)(mousePosition.X / VolumeBar.ActualWidth * 100);
             UpdateVolume(newVolume);
             device.AudioEndpointVolume.MasterVolumeLevelScalar = newVolume / 100.0f;
+
+            // 播放音频
+            PlaySound();
+        }
+
+        private void PlaySound()
+        {
+            try
+            {
+                using (SoundPlayer player = new SoundPlayer(@"C:\Windows\Media\ding.wav"))
+                {
+                    player.Play();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"播放音频失败: {ex.Message}");
+            }
         }
     }
 }
